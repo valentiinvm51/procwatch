@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>ProcWatch Demo</title>
+    <style>
+        /* This is a static demo that mimics the WHM ProcWatch UI (light theme, no dark mode). */
+        :root {
+            --pw-bg: #ffffff;
+            --pw-surface: #ffffff;
+            --pw-surface2: rgba(17, 24, 39, .02);
+            --pw-text: #111827;
+            --pw-muted: #6b7280;
+            --pw-border: rgba(17, 24, 39, .10);
+            --pw-shadow: 0 10px 20px rgba(0, 0, 0, .08);
+            --pw-radius: 14px;
+            --pw-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --pw-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+            --pw-warn: rgba(245, 158, 11, .18);
+            --pw-warnBorder: rgba(245, 158, 11, .35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f6f8;
+            color: var(--pw-text);
+            font-family: var(--pw-sans);
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .pw-root {
+            margin: 18px auto 28px;
+            padding: 0 12px;
+            max-width: 980px;
+        }
+
+        @media (min-width: 1368px) {
+            .pw-root {
+                max-width: 1200px;
+            }
+        }
+
+        @media (min-width: 1920px) {
+            .pw-root {
+                max-width: 1600px;
+            }
+        }
+
+        .pw-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .pw-h1 {
+            font-size: 18px;
+            font-weight: 750;
+            letter-spacing: .2px;
+        }
+
+        .pw-sub {
+            margin-top: 4px;
+            color: var(--pw-muted);
+            font-size: 12px;
+            line-height: 1.35;
+            max-width: 760px;
+        }
+
+        .pw-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .pw-pill {
+            padding: 7px 9px;
+            border: 1px solid var(--pw-border);
+            background: var(--pw-surface2);
+            border-radius: 999px;
+            font-size: 12px;
+            color: var(--pw-muted);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, .05);
+        }
+
+        .pw-warn {
+            background: var(--pw-warn);
+            border-color: var(--pw-warnBorder);
+        }
+
+        .pw-grid {
+            display: grid;
+            grid-template-columns:repeat(12, 1fr);
+            gap: 12px;
+        }
+
+        .pw-card {
+            min-width: 0;
+            background: var(--pw-surface);
+            border: 1px solid var(--pw-border);
+            border-radius: var(--pw-radius);
+            box-shadow: var(--pw-shadow);
+            overflow: hidden;
+        }
+
+        .pw-hd {
+            padding: 12px 14px 9px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid var(--pw-border);
+            background: var(--pw-surface2);
+        }
+
+        .pw-k {
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: .2px;
+        }
+
+        .pw-t {
+            font-family: var(--pw-mono);
+            font-size: 11px;
+            color: var(--pw-muted);
+        }
+
+        .pw-bd {
+            padding: 12px 14px 14px;
+        }
+
+        .pw-metric {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 2px 0 8px;
+        }
+
+        .pw-big {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .pw-unit {
+            font-size: 12px;
+            color: var(--pw-muted);
+            margin-left: 6px;
+        }
+
+        .pw-right {
+            text-align: right;
+            color: var(--pw-muted);
+            font-size: 11px;
+            font-family: var(--pw-mono);
+            line-height: 1.35;
+        }
+
+        .pw-bar {
+            height: 9px;
+            background: var(--pw-surface2);
+            border: 1px solid var(--pw-border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .pw-bar > span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(53, 208, 127, .95), rgba(255, 204, 102, .95), rgba(255, 92, 122, .95));
+            transition: width .55s ease;
+        }
+
+        .pw-subgrid {
+            display: grid;
+            grid-template-columns:repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 9px;
+        }
+
+        .pw-kv {
+            padding: 9px;
+            border: 1px solid var(--pw-border);
+            border-radius: 12px;
+            background: var(--pw-surface2);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--pw-muted);
+        }
+
+        .pw-kv b {
+            color: var(--pw-text);
+            font-weight: 700;
+            font-family: var(--pw-mono);
+        }
+
+        .pw-span-3 {
+            grid-column: span 3;
+        }
+
+        .pw-span-6 {
+            grid-column: span 6;
+        }
+
+        .pw-span-12 {
+            grid-column: span 12;
+        }
+
+        @media (max-width: 980px) {
+            .pw-span-3 {
+                grid-column: span 12;
+            }
+
+            .pw-span-6 {
+                grid-column: span 12;
+            }
+
+            .pw-top {
+                flex-direction: column;
+                align-items: flex-start
+            }
+
+            .pw-meta {
+                justify-content: flex-start
+            }
+        }
+
+        table.pw-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            color: var(--pw-text);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .pw-table th, .pw-table td {
+            text-align: left;
+            padding: 9px;
+            border-bottom: 1px solid var(--pw-border);
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .pw-table th {
+            color: var(--pw-muted);
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: .2px;
+            text-transform: uppercase;
+            background: var(--pw-surface2);
+        }
+
+        .pw-table tbody tr:hover {
+            background: var(--pw-surface2);
+        }
+
+        .pw-num {
+            font-family: var(--pw-mono);
+            text-align: right;
+        }
+
+        .pw-pad-top {
+            padding-top: 9px;
+        }
+
+        .pw-footer {
+            margin-top: 12px;
+            color: var(--pw-muted);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .pw-link {
+            color: var(--pw-muted);
+            text-decoration: underline;
+        }
+
+        .pw-link:hover {
+            color: var(--pw-text);
+        }
+    </style>
+</head>
+<body>
+<div class="pw-root" id="procwatch">
+    <div class="pw-top">
+        <div class="pw-title">
+            <div class="pw-h1">ProcWatch</div>
+            <div class="pw-sub">Fast, process-aware snapshots for WHM. Refreshes every 5 seconds. No history.</div>
+        </div>
+        <div class="pw-meta">
+            <span class="pw-pill">Host: <b id="host">demo-server.net</b></span>
+            <span class="pw-pill">Last update: <b id="ts">-</b></span>
+            <span class="pw-pill pw-warn" id="warnPill" style="display:none;">⚠ <b id="warnText">partial data</b></span>
+        </div>
+    </div>
+
+    <div class="pw-grid">
+        <div class="pw-card pw-span-3">
+            <div class="pw-hd">
+                <div class="pw-k">CPU</div>
+                <div class="pw-t">user/sys/iowait</div>
+            </div>
+            <div class="pw-bd">
+                <div class="pw-metric">
+                    <div><span class="pw-big" id="cpuPct">-</span><span class="pw-unit">%</span></div>
+                    <div class="pw-right" id="cpuBreak">-</div>
+                </div>
+                <div class="pw-bar"><span id="cpuBar"></span></div>
+                <div class="pw-subgrid">
+                    <div class="pw-kv"><span>IO wait</span><b id="iowait">-</b></div>
+                    <div class="pw-kv"><span>Note</span><b>snapshot</b></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pw-card pw-span-3">
+            <div class="pw-hd">
+                <div class="pw-k">Memory</div>
+                <div class="pw-t">used/total</div>
+            </div>
+            <div class="pw-bd">
+                <div class="pw-metric">
+                    <div><span class="pw-big" id="memUsed">-</span><span class="pw-unit">GB</span></div>
+                    <div class="pw-right" id="memMeta">-</div>
+                </div>
+                <div class="pw-bar"><span id="memBar"></span></div>
+                <div class="pw-subgrid">
+                    <div class="pw-kv"><span>Available</span><b id="memAvail">-</b></div>
+                    <div class="pw-kv"><span>Swap used</span><b id="swapUsed">-</b></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pw-card pw-span-3">
+            <div class="pw-hd">
+                <div class="pw-k">Load average</div>
+                <div class="pw-t">1/5/15</div>
+            </div>
+            <div class="pw-bd">
+                <div class="pw-metric">
+                    <div><span class="pw-big" id="l1">-</span><span class="pw-unit">1m</span></div>
+                    <div class="pw-right" id="loads">-</div>
+                </div>
+                <div class="pw-bar"><span id="loadBar"></span></div>
+                <div class="pw-subgrid">
+                    <div class="pw-kv"><span>Hint</span><b id="loadHint">-</b></div>
+                    <div class="pw-kv"><span>Note</span><b>relative</b></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pw-card pw-span-3">
+            <div class="pw-hd">
+                <div class="pw-k">Disk</div>
+                <div class="pw-t">/</div>
+            </div>
+            <div class="pw-bd">
+                <div class="pw-metric">
+                    <div><span class="pw-big" id="diskPct">-</span><span class="pw-unit">%</span></div>
+                    <div class="pw-right" id="diskMeta">-</div>
+                </div>
+                <div class="pw-bar"><span id="diskBar"></span></div>
+                <div class="pw-subgrid">
+                    <div class="pw-kv"><span>Used</span><b id="diskUsed">-</b></div>
+                    <div class="pw-kv"><span>Free</span><b id="diskFree">-</b></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pw-card pw-span-6">
+            <div class="pw-hd">
+                <div class="pw-k">Top accounts</div>
+                <div class="pw-t">by CPU (snapshot)</div>
+            </div>
+            <div class="pw-bd pw-pad-top">
+                <table class="pw-table">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Top pool</th>
+                        <th class="pw-num">CPU%</th>
+                        <th class="pw-num">RAM</th>
+                        <th class="pw-num">PHP</th>
+                        <th class="pw-num">Proc</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tblAccounts"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pw-card pw-span-6">
+            <div class="pw-hd">
+                <div class="pw-k">Top processes</div>
+                <div class="pw-t">CPU/RAM/elapsed</div>
+            </div>
+            <div class="pw-bd pw-pad-top">
+                <table class="pw-table">
+                    <thead>
+                    <tr>
+                        <th>PID</th>
+                        <th>User</th>
+                        <th>Command</th>
+                        <th class="pw-num">CPU%</th>
+                        <th class="pw-num">RAM</th>
+                        <th class="pw-num">Elapsed</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tblProcs"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pw-card pw-span-12">
+            <div class="pw-hd">
+                <div class="pw-k">Top PHP-FPM pools</div>
+                <div class="pw-t">pool-level view</div>
+            </div>
+            <div class="pw-bd pw-pad-top">
+                <table class="pw-table">
+                    <thead>
+                    <tr>
+                        <th>Pool</th>
+                        <th>Owner</th>
+                        <th class="pw-num">CPU%</th>
+                        <th class="pw-num">RAM</th>
+                        <th class="pw-num">Workers</th>
+                        <th class="pw-num">Max elapsed</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tblPools"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="pw-footer">
+        ProcWatch <b>v1.1.0</b> •
+        <a class="pw-link" href="https://github.com/afbora/procwatch/releases/tag/1.1.0" target="_blank" rel="noreferrer">GitHub release</a>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // Demo-only: generates pseudo-random but realistic-looking data every 5 seconds.
+        function clamp(n, a, b) {
+            return Math.max(a, Math.min(b, n));
+        }
+
+        function pct(permille) {
+            return (permille / 10).toFixed(1);
+        }
+
+        function fmtGB(kb) {
+            return (kb / 1024 / 1024).toFixed(2) + " GB";
+        }
+
+        function fmtMB(kb) {
+            const mb = kb / 1024;
+            if (mb >= 1024) return (mb / 1024).toFixed(2) + " GB";
+            return mb.toFixed(0) + " MB";
+        }
+
+        function loadHint(l1) {
+            if (l1 < 0.8) return "OK";
+            if (l1 < 2.0) return "Busy";
+            return "High";
+        }
+
+        function setBar(id, val) {
+            document.getElementById(id).style.width = clamp(val, 0, 100) + "%";
+        }
+
+        const SNAP = {
+          ts: 1770236800,
+          cpu: { pct: 77, user: 27, sys: 18, iowait: 4 },
+          load: { l1: 1.04, l5: 0.77, l15: 0.7 },
+          mem: {
+            mem_total_kb: 32614740,
+            mem_avail_kb: 23283995,
+            swap_total_kb: 2096124,
+            swap_free_kb: 1748973
+          },
+          disk: {
+            mount: "/",
+            total_kb: 458156312,
+            used_kb: 117269434,
+            free_kb: 327716938,
+            used_pct: 25
+          },
+
+          accounts: [
+            { user: "root", cpu: 33.9, rss_kb: 2726297, php: 0, proc: 279, top_pool: "-" },
+
+            { user: "tenant+", cpu: 2.0, rss_kb: 50775, php: 1, proc: 1, top_pool: "goldenlabs_io" },
+            { user: "client+", cpu: 1.9, rss_kb: 17207, php: 2, proc: 2, top_pool: "urbankitchen_net" },
+            { user: "mysql",  cpu: 1.6, rss_kb: 573440, php: 0, proc: 1, top_pool: "-" },
+
+            { user: "node+", cpu: 1.6, rss_kb: 121551, php: 2, proc: 2, top_pool: "novamarket_org" },
+            { user: "service+", cpu: 1.6, rss_kb: 15058, php: 5, proc: 5, top_pool: "atlasservices_net" },
+
+            { user: "instance+", cpu: 1.3, rss_kb: 14333, php: 2, proc: 2, top_pool: "pixelelectric_net" },
+            { user: "workspace+", cpu: 0.5, rss_kb: 18968, php: 1, proc: 1, top_pool: "edgeelectric_com" },
+            { user: "hosted+", cpu: 0.2, rss_kb: 47101, php: 4, proc: 4, top_pool: "coreconstruction_com" },
+            { user: "profile+", cpu: 0.0, rss_kb: 91634, php: 4, proc: 4, top_pool: "aryafinance_com" }
+          ],
+
+          procs: [
+            { pid: 1039893, user: "mysql", cpu: 1.4, rss_kb: 574028, elapsed: "59:24:38", cmd: "/usr/sbin/mysqld" },
+
+            { pid: 3533085, user: "client+", cpu: 1.3, rss_kb: 30260, elapsed: "00:08:49", cmd: "php-fpm: pool urbankitchen_net" },
+            { pid: 3599387, user: "profile+", cpu: 0.8, rss_kb: 16765, elapsed: "00:08:16", cmd: "php-fpm: pool aryafinance_com" },
+            { pid: 3469483, user: "client+", cpu: 0.8, rss_kb: 33365, elapsed: "00:09:22", cmd: "php-fpm: pool urbankitchen_net" },
+
+            { pid: 3440065, user: "hosted+", cpu: 0.6, rss_kb: 19822, elapsed: "00:13:27", cmd: "php-fpm: pool coreconstruction_com" },
+            { pid: 3557009, user: "node+", cpu: 0.5, rss_kb: 11184, elapsed: "00:06:21", cmd: "php-fpm: pool novamarket_org" },
+
+            { pid: 3586895, user: "hosted+", cpu: 0.5, rss_kb: 26143, elapsed: "00:08:59", cmd: "php-fpm: pool coreconstruction_com" },
+            { pid: 66985, user: "root", cpu: 0.4, rss_kb: 30203, elapsed: "02:40:30", cmd: "whostmgrd - serving 127.0.0.1" },
+
+            { pid: 3431720, user: "tenant+", cpu: 0.4, rss_kb: 12315, elapsed: "00:10:12", cmd: "php-fpm: pool goldenlabs_io" },
+            { pid: 3462770, user: "workspace+", cpu: 0.2, rss_kb: 11053, elapsed: "00:08:27", cmd: "php-fpm: pool edgeelectric_com" }
+          ],
+
+          pools: [
+            { pool: "goldenlabs_io", owner: "tenant+", cpu: 2.0, rss_kb: 50775, workers: 1, max_elapsed: "00:46:29" },
+            { pool: "urbankitchen_net", owner: "client+", cpu: 1.9, rss_kb: 17207, workers: 2, max_elapsed: "00:50:54" },
+            { pool: "novamarket_org", owner: "node+", cpu: 1.6, rss_kb: 121551, workers: 2, max_elapsed: "00:38:46" },
+            { pool: "atlasservices_net", owner: "service+", cpu: 1.6, rss_kb: 15058, workers: 5, max_elapsed: "00:32:00" },
+            { pool: "pixelelectric_net", owner: "instance+", cpu: 1.3, rss_kb: 14333, workers: 2, max_elapsed: "00:42:53" },
+            { pool: "omegatravel_io", owner: "member+", cpu: 0.7, rss_kb: 28096, workers: 1, max_elapsed: "00:15:41" },
+            { pool: "alphaservices_com", owner: "stack+", cpu: 0.6, rss_kb: 22884, workers: 4, max_elapsed: "00:18:28" },
+            { pool: "edgeelectric_com", owner: "workspace+", cpu: 0.5, rss_kb: 18968, workers: 1, max_elapsed: "00:51:38" },
+            { pool: "coreconstruction_com", owner: "hosted+", cpu: 0.2, rss_kb: 47101, workers: 4, max_elapsed: "00:39:53" },
+            { pool: "aryafinance_com", owner: "profile+", cpu: 0.0, rss_kb: 91634, workers: 4, max_elapsed: "00:27:03" }
+          ],
+
+          warnings: [],
+          partial: false
+        };
+
+
+        // Replace with runtime generator below
+        function gen() {
+            return JSON.parse(document.getElementById("seed").textContent);
+        }
+
+        function render(m) {
+            const ts = new Date((m.ts || 0) * 1000);
+            document.getElementById("ts").textContent = isNaN(ts.getTime()) ? "-" : ts.toLocaleTimeString();
+
+            document.getElementById("cpuPct").textContent = pct(m.cpu.pct || 0);
+            document.getElementById("cpuBreak").innerHTML = `user ${pct(m.cpu.user || 0)}%<br>sys ${pct(m.cpu.sys || 0)}%<br>iowait ${pct(m.cpu.iowait || 0)}%`;
+            document.getElementById("iowait").textContent = pct(m.cpu.iowait || 0) + "%";
+            setBar("cpuBar", (m.cpu.pct || 0) / 10);
+
+            const total = m.mem.mem_total_kb || 0, avail = m.mem.mem_avail_kb || 0, used = Math.max(0, total - avail);
+            document.getElementById("memUsed").textContent = (used / 1024 / 1024).toFixed(1);
+            document.getElementById("memMeta").innerHTML = `${fmtGB(used)} / ${fmtGB(total)}<br><span style="color:var(--pw-muted);font-family:var(--pw-mono);">${((used / total) * 100 || 0).toFixed(1)}% used</span>`;
+            document.getElementById("memAvail").textContent = fmtGB(avail);
+            const swapUsed = Math.max(0, (m.mem.swap_total_kb || 0) - (m.mem.swap_free_kb || 0));
+            document.getElementById("swapUsed").textContent = fmtGB(swapUsed);
+            setBar("memBar", (used / total) * 100 || 0);
+
+            document.getElementById("l1").textContent = (m.load.l1 || 0).toFixed(2);
+            document.getElementById("loads").textContent = `${(m.load.l1 || 0).toFixed(2)} / ${(m.load.l5 || 0).toFixed(2)} / ${(m.load.l15 || 0).toFixed(2)}`;
+            document.getElementById("loadHint").textContent = loadHint(m.load.l1 || 0);
+            setBar("loadBar", Math.min(100, (m.load.l1 || 0) * 25));
+
+            document.getElementById("diskPct").textContent = (m.disk.used_pct || 0);
+            document.getElementById("diskMeta").textContent = `${fmtGB(m.disk.used_kb || 0)} / ${fmtGB(m.disk.total_kb || 0)}`;
+            document.getElementById("diskUsed").textContent = fmtGB(m.disk.used_kb || 0);
+            document.getElementById("diskFree").textContent = fmtGB(m.disk.free_kb || 0);
+            setBar("diskBar", m.disk.used_pct || 0);
+
+            const a = document.getElementById("tblAccounts");
+            a.innerHTML = "";
+            (m.accounts || []).slice(0, 10).forEach(r => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${r.user}</td><td style="color:var(--pw-muted);font-family:var(--pw-mono);">${r.top_pool || "-"}</td><td class="pw-num">${(r.cpu || 0).toFixed(1)}</td><td class="pw-num">${fmtMB(r.rss_kb || 0)}</td><td class="pw-num">${r.php || 0}</td><td class="pw-num">${r.proc || 0}</td>`;
+                a.appendChild(tr);
+            });
+
+            const p = document.getElementById("tblProcs");
+            p.innerHTML = "";
+            (m.procs || []).slice(0, 10).forEach(r => {
+                const cmd = (r.cmd || "").length > 52 ? (r.cmd || "").slice(0, 52) + "..." : (r.cmd || "");
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td style="color:var(--pw-muted);font-family:var(--pw-mono);">${r.pid}</td><td>${r.user}</td><td style="color:var(--pw-muted);font-family:var(--pw-mono);" title="${(r.cmd || "").replaceAll('"', '&quot;')}">${cmd}</td><td class="pw-num">${(r.cpu || 0).toFixed(1)}</td><td class="pw-num">${fmtMB(r.rss_kb || 0)}</td><td class="pw-num">${r.elapsed || "-"}</td>`;
+                p.appendChild(tr);
+            });
+
+            const pools = document.getElementById("tblPools");
+            pools.innerHTML = "";
+            (m.pools || []).slice(0, 10).forEach(r => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${r.pool}</td><td style="color:var(--pw-muted);font-family:var(--pw-mono);">${r.owner}</td><td class="pw-num">${(r.cpu || 0).toFixed(1)}</td><td class="pw-num">${fmtMB(r.rss_kb || 0)}</td><td class="pw-num">${r.workers || 0}</td><td class="pw-num">${r.max_elapsed || "-"}</td>`;
+                pools.appendChild(tr);
+            });
+        }
+
+        // Lightweight runtime generator (JS) so values change every refresh.
+        const adjectives = [
+            "bright", "silent", "rapid", "modern", "dynamic", "stellar", "fusion", "quantum",
+            "vertex", "apex", "orbit", "lunar", "solar", "atomic", "neon", "matrix",
+            "vector", "zenith", "core", "flux"
+        ];
+
+        const nouns = [
+            "systems", "solutions", "services", "labs", "group", "network", "digital",
+            "platform", "cloud", "works", "studio", "software", "tech", "analytics",
+            "logix", "stack", "engine", "hub", "factory", "ops"
+        ];
+        const userParts = [
+            "client", "account", "tenant", "user", "customer", "member", "hosted",
+            "site", "owner", "project", "service", "node", "instance", "app",
+            "workspace", "profile", "runtime", "process"
+        ];
+        const tlds = ["com", "net", "org", "io"];
+
+        function pick(a) {
+            return a[Math.floor(Math.random() * a.length)];
+        }
+
+        function domain() {
+            return pick(adjectives) + pick(nouns) + "_" + pick(tlds);
+        }
+
+        function user() {
+            const u = pick(userParts);
+            return (u.length > 6 ? u.slice(0, 7) + "+" : u + "+");
+        }
+
+        function elapsed() {
+            const s = Math.floor(Math.random() * 3600) + 5;
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const ss = s % 60;
+            return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(ss).padStart(2, "0");
+        }
+
+        function genSnapshot() {
+            const ts = Math.floor(Date.now() / 1000);
+            const cpuPct = Math.random() * 11.8 + 0.2;
+            const u = cpuPct * (Math.random() * 0.35 + 0.35);
+            const sy = cpuPct * (Math.random() * 0.30 + 0.15);
+            const io = Math.max(0, cpuPct - u - sy) * (Math.random() * 0.6);
+            const cpu = {pct: Math.floor(cpuPct * 10), user: Math.floor(u * 10), sys: Math.floor(sy * 10), iowait: Math.floor(io * 10)};
+
+            const l1 = Math.random() * 1.35 + 0.05;
+            const l5 = Math.max(0.01, l1 * (Math.random() * 0.5 + 0.35));
+            const l15 = Math.max(0.01, l5 * (Math.random() * 0.35 + 0.6));
+            const load = {l1: Math.round(l1 * 100) / 100, l5: Math.round(l5 * 100) / 100, l15: Math.round(l15 * 100) / 100};
+
+            const memTotal = 32614740;
+            const memAvail = Math.floor(memTotal * (Math.random() * 0.16 + 0.70));
+            const swapTotal = 2096124;
+            const swapFree = Math.floor(swapTotal * (Math.random() * 0.20 + 0.75));
+            const mem = {mem_total_kb: memTotal, mem_avail_kb: memAvail, swap_total_kb: swapTotal, swap_free_kb: swapFree};
+
+            const diskTotal = 458156312;
+            const diskUsed = Math.floor(diskTotal * (Math.random() * 0.20 + 0.25));
+            const diskFree = diskTotal - diskUsed - Math.floor(diskTotal * (Math.random() * 0.04 + 0.02));
+            const usedPct = Math.floor((diskUsed / diskTotal) * 100);
+            const disk = {mount: "/", total_kb: diskTotal, used_kb: diskUsed, free_kb: diskFree, used_pct: usedPct};
+
+            const pools = [];
+            const accounts = [];
+            const poolNames = Array.from({length: 14}, domain);
+            const owners = Array.from({length: 14}, user);
+
+            for (let i = 0; i < 10; i++) {
+                const pool = poolNames[i];
+                const owner = owners[i];
+                const cpuA = Math.min(12, Math.max(0.1, (Math.random() * 2.2)));
+                const rssChoices = [12000, 15000, 18000, 25500, 41000, 98000, 127000, 220000];
+                const rss = Math.floor(pick(rssChoices) * (Math.random() * 0.4 + 0.85));
+                const workers = Math.floor(Math.random() * 6) + 1;
+                const maxEl = elapsed();
+                accounts.push({user: owner, cpu: Math.round(cpuA * 10) / 10, rss_kb: rss, php: workers, proc: workers, top_pool: pool});
+                pools.push({pool: pool, owner: owner, cpu: Math.round(cpuA * 10) / 10, rss_kb: rss, workers: workers, max_elapsed: maxEl});
+            }
+
+            // Add familiar system rows
+            accounts[0] = {
+                user: "root",
+                cpu: Math.round((Math.random() * 35 + 10) * 10) / 10,
+                rss_kb: Math.floor(2.6 * 1024 * 1024),
+                php: 0,
+                proc: Math.floor(Math.random() * 140 + 240),
+                top_pool: "-"
+            };
+            accounts[1] = {user: "mysql", cpu: Math.round((Math.random() * 1.8 + 0.6) * 10) / 10, rss_kb: Math.floor(560 * 1024 * (Math.random() * 0.15 + 0.95)), php: 0, proc: 1, top_pool: "-"};
+
+            accounts.sort((a, b) => b.cpu - a.cpu);
+            pools.sort((a, b) => b.cpu - a.cpu);
+
+            const procs = [];
+            procs.push({
+                pid: Math.floor(Math.random() * 500000) + 900000,
+                user: "mysql",
+                cmd: "/usr/sbin/mysqld",
+                cpu: Math.round((Math.random() * 1.0 + 0.6) * 10) / 10,
+                rss_kb: Math.floor(560 * 1024 * (Math.random() * 0.15 + 0.95)),
+                elapsed: "" + (Math.floor(Math.random() * 90 + 40)) + ":14:" + String(Math.floor(Math.random() * 60)).padStart(2, "0")
+            });
+            procs.push({
+                pid: Math.floor(Math.random() * 70000) + 10000,
+                user: "root",
+                cmd: "whostmgrd - serving 127.0.0.1",
+                cpu: Math.round((Math.random() * 1.0 + 0.2) * 10) / 10,
+                rss_kb: Math.floor(42 * 1024 * (Math.random() * 0.7 + 0.6)),
+                elapsed: elapsed()
+            });
+
+            for (let i = 0; i < 8; i++) {
+                const pickPool = pools[Math.floor(Math.random() * 8) + 2];
+                procs.push({
+                    pid: Math.floor(Math.random() * 250000) + 3400000,
+                    user: pickPool.owner,
+                    cmd: "php-fpm: pool " + pickPool.pool,
+                    cpu: Math.round((Math.random() * 1.3 + 0.1) * 10) / 10,
+                    rss_kb: Math.floor(pick([12500, 18600, 25500, 27000]) * (Math.random() * 0.4 + 0.85)),
+                    elapsed: elapsed()
+                });
+            }
+            procs.sort((a, b) => b.cpu - a.cpu);
+
+            return {ts, cpu, load, mem, disk, accounts: accounts.slice(0, 10), procs: procs.slice(0, 10), pools: pools.slice(0, 10), warnings: [], partial: false};
+        }
+
+        function tick() {
+            render(genSnapshot());
+        }
+
+        tick();
+        setInterval(tick, 5000);
+    })();
+</script>
+</body>
+</html>
