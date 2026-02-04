@@ -20,7 +20,7 @@ This repository is intentionally **simple**:
 
 🚀 Live preview: [https://afbora.github.io/procwatch/preview.html](https://afbora.github.io/procwatch/preview.html)
 
-<img width="1440" height="1244" alt="preview" src="https://github.com/user-attachments/assets/9056b445-1a60-4e6f-befc-bcf336b0869e" />
+<img width="100%" height="100%" alt="preview" src="https://github.com/user-attachments/assets/9056b445-1a60-4e6f-befc-bcf336b0869e" />
 
 ---
 
