@@ -48,14 +48,19 @@ main() {
   mkdir -p "${ICON_DST_DIR}"
   install -m 0644 "${ICON_SRC}" "${ICON_DST_DIR}/procwatch.png"
 
-  echo "[3/5] Installing CGI script to: ${CGI_DST_DIR}"
+  echo "[3/6] Installing CGI scripts to: ${CGI_DST_DIR}"
   mkdir -p "${CGI_DST_DIR}"
   install -m 0755 "${CGI_SRC_DIR}/index.cgi" "${CGI_DST_DIR}/index.cgi"
+  install -m 0755 "${CGI_SRC_DIR}/metrics.cgi" "${CGI_DST_DIR}/metrics.cgi"
 
-  echo "[4/5] Registering AppConfig (adds WHM menu item)"
+  echo "[4/6] Installing Template Toolkit interface"
+  mkdir -p "/usr/local/cpanel/whostmgr/docroot/templates/procwatch"
+  install -m 0644 "${SCRIPT_DIR}/templates/procwatch/index.tmpl" "/usr/local/cpanel/whostmgr/docroot/templates/procwatch/index.tmpl"
+
+  echo "[5/6] Registering AppConfig (adds WHM menu item)"
   /usr/local/cpanel/bin/register_appconfig "${APP_CONF_SRC}" >/dev/null
 
-  echo "[5/5] Done"
+  echo "[6/6] Done"
   echo
   echo "Installed successfully."
   echo "- Log into WHM and open: ProcWatch"

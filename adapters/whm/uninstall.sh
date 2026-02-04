@@ -25,13 +25,17 @@ main() {
     /usr/local/cpanel/bin/unregister_appconfig "${APP_CONF_SRC}" >/dev/null || true
   fi
 
-  echo "[2/4] Removing CGI dir: ${CGI_DST_DIR}"
+  echo "[2/5] Removing CGI dir: ${CGI_DST_DIR}"
   rm -rf "${CGI_DST_DIR}"
 
-  echo "[3/4] Removing icon: ${ICON_DST}"
+  echo "[3/5] Removing Template Toolkit interface"
+  rm -f "/usr/local/cpanel/whostmgr/docroot/templates/procwatch/index.tmpl"
+  rmdir "/usr/local/cpanel/whostmgr/docroot/templates/procwatch" 2>/dev/null || true
+
+  echo "[4/5] Removing icon: ${ICON_DST}"
   rm -f "${ICON_DST}"
 
-  echo "[4/4] Removing cache dir: ${CACHE_DIR}"
+  echo "[5/5] Removing cache dir: ${CACHE_DIR}"
   rm -rf "${CACHE_DIR}"
 
   echo

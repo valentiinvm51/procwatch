@@ -49,8 +49,12 @@ The installer copies files to:
   - Source: `adapters/whm/appconfig/procwatch.conf`
   - cPanel stores a copy under `/var/cpanel/apps/`
 
-- WHM CGI (plugin UI + JSON endpoint):
-  - `/usr/local/cpanel/whostmgr/docroot/cgi/procwatch/index.cgi`
+- WHM CGI:
+  - UI (Perl CGI that renders Template Toolkit wrapper): `/usr/local/cpanel/whostmgr/docroot/cgi/procwatch/index.cgi`
+  - Metrics JSON endpoint (bash): `/usr/local/cpanel/whostmgr/docroot/cgi/procwatch/metrics.cgi`
+
+- WHM interface template (Template Toolkit):
+  - `/usr/local/cpanel/whostmgr/docroot/templates/procwatch/index.tmpl`
 
 - Icon:
   - `/usr/local/cpanel/whostmgr/docroot/addon_plugins/procwatch.png`
@@ -186,3 +190,8 @@ After changing the ACL, re-register the plugin:
 > ⚠️ ProcWatch exposes server-wide process and resource information.  
 > Making it visible to non-root users is **not recommended**.
 
+
+
+## Theme
+
+ProcWatch defaults to a **light** theme to match WHM. Use the **Dark** toggle in the top-right to switch themes. Your choice is stored in `localStorage` for your browser.
