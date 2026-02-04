@@ -1,4 +1,4 @@
-# ProcWatch (cPanel/WHM Plugin) — MVP
+# ProcWatch (cPanel/WHM Plugin)
 
 ProcWatch is a lightweight, **process-aware** server snapshot page designed to run inside **WHM** (cPanel).
 It shows, in a single screen:
@@ -17,6 +17,9 @@ This repository is intentionally **simple**:
 - No heavy dependencies
 
 > **Scope:** WHM (root / reseller). Not intended for end-user cPanel accounts.
+
+<img width="1440" height="1244" alt="preview" src="https://github.com/user-attachments/assets/9056b445-1a60-4e6f-befc-bcf336b0869e" />
+
 
 ---
 
