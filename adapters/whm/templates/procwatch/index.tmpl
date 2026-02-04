@@ -28,15 +28,12 @@ WRAPPER 'master_templates/master.tmpl'
       <span class="pw-pill">Host: <b id="host">-</b></span>
       <span class="pw-pill">Last update: <b id="ts">-</b></span>
       <span class="pw-pill pw-warn" id="warnPill" style="display:none;">⚠ <b id="warnText">partial data</b></span>
-      <button type="button" class="pw-toggle" id="themeToggle" aria-label="Toggle dark mode">
-        <span class="pw-toggle-dot" aria-hidden="true"></span>
-        <span class="pw-toggle-text" id="themeText">Dark</span>
-      </button>
     </div>
   </div>
 
   <div class="pw-grid">
-    <div class="pw-card">
+    <!-- Row 1: 4 metric cards -->
+    <div class="pw-card pw-span-3">
       <div class="pw-hd"><div class="pw-k">CPU</div><div class="pw-t">user/sys/iowait</div></div>
       <div class="pw-bd">
         <div class="pw-metric">
@@ -51,7 +48,7 @@ WRAPPER 'master_templates/master.tmpl'
       </div>
     </div>
 
-    <div class="pw-card">
+    <div class="pw-card pw-span-3">
       <div class="pw-hd"><div class="pw-k">Memory</div><div class="pw-t">used/total</div></div>
       <div class="pw-bd">
         <div class="pw-metric">
@@ -66,7 +63,7 @@ WRAPPER 'master_templates/master.tmpl'
       </div>
     </div>
 
-    <div class="pw-card">
+    <div class="pw-card pw-span-3">
       <div class="pw-hd"><div class="pw-k">Load average</div><div class="pw-t">1/5/15</div></div>
       <div class="pw-bd">
         <div class="pw-metric">
@@ -81,7 +78,7 @@ WRAPPER 'master_templates/master.tmpl'
       </div>
     </div>
 
-    <div class="pw-card">
+    <div class="pw-card pw-span-3">
       <div class="pw-hd"><div class="pw-k">Disk</div><div class="pw-t">/</div></div>
       <div class="pw-bd">
         <div class="pw-metric">
@@ -96,6 +93,7 @@ WRAPPER 'master_templates/master.tmpl'
       </div>
     </div>
 
+    <!-- Row 2: Top accounts + Top processes -->
     <div class="pw-card pw-span-6">
       <div class="pw-hd"><div class="pw-k">Top accounts</div><div class="pw-t">by CPU (snapshot)</div></div>
       <div class="pw-bd pw-pad-top">
@@ -116,6 +114,7 @@ WRAPPER 'master_templates/master.tmpl'
       </div>
     </div>
 
+    <!-- Row 3: Pools -->
     <div class="pw-card pw-span-12">
       <div class="pw-hd"><div class="pw-k">Top PHP-FPM pools</div><div class="pw-t">pool-level view</div></div>
       <div class="pw-bd pw-pad-top">
@@ -127,11 +126,14 @@ WRAPPER 'master_templates/master.tmpl'
     </div>
   </div>
 
-  <div class="pw-footer">Tip: This is a live snapshot. History can be added later as an optional module.</div>
+  <div class="pw-footer">
+    ProcWatch <b>v1.0.0</b> •
+    <a class="pw-link" href="https://github.com/afbora/procwatch/releases/tag/1.0.0" target="_blank" rel="noreferrer">GitHub release</a>
+  </div>
 </div>
 
 <style>
-/* Light theme defaults (WHM-friendly). Dark mode is opt-in via .pw-dark on #procwatch. */
+/* Light theme defaults (WHM-friendly). */
 #procwatch{
   --pw-bg: #ffffff;
   --pw-surface: #ffffff;
@@ -149,32 +151,28 @@ WRAPPER 'master_templates/master.tmpl'
   font-family: var(--pw-sans);
   color: var(--pw-text);
 }
-#procwatch.pw-dark{
-  --pw-bg: #0b1020;
-  --pw-surface: rgba(255,255,255,.05);
-  --pw-surface2: rgba(0,0,0,.10);
-  --pw-text: #e9ecff;
-  --pw-muted: #a8b0d6;
-  --pw-border: rgba(255,255,255,.10);
-  --pw-shadow: 0 12px 30px rgba(0,0,0,.35);
-  --pw-accent: rgba(53,208,127,.95);
-  --pw-warn: rgba(245, 158, 11, .14);
-  --pw-warnBorder: rgba(245, 158, 11, .28);
+
+/* Local reset (avoid WHM global CSS collisions) */
+#procwatch, #procwatch * { box-sizing: border-box; }
+#procwatch table { border-collapse: collapse !important; }
+
+.pw-root{
+  margin:18px auto 28px;
+  padding:0 12px;
+  max-width: 980px;
 }
-.pw-root{max-width:1180px;margin:18px auto 28px;padding:0 12px;}
+@media (min-width: 1368px) { .pw-root { max-width: 1200px; } }
+@media (min-width: 1920px) { .pw-root { max-width: 1600px; } }
+
 .pw-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
 .pw-h1{font-size:18px;font-weight:750;letter-spacing:.2px;}
 .pw-sub{margin-top:4px;color:var(--pw-muted);font-size:12px;line-height:1.35;max-width:760px;}
 .pw-meta{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;}
 .pw-pill{padding:7px 9px;border:1px solid var(--pw-border);background:var(--pw-surface2);border-radius:999px;font-size:12px;color:var(--pw-muted);box-shadow:0 8px 16px rgba(0,0,0,.05);}
-#procwatch.pw-dark .pw-pill{box-shadow:0 8px 16px rgba(0,0,0,.18);}
 .pw-warn{background:var(--pw-warn);border-color:var(--pw-warnBorder);}
-.pw-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--pw-border);background:var(--pw-surface2);border-radius:999px;padding:7px 10px;font-size:12px;color:var(--pw-muted);cursor:pointer;user-select:none;}
-.pw-toggle:hover{filter:brightness(0.98);}
-#procwatch.pw-dark .pw-toggle:hover{filter:brightness(1.06);}
-.pw-toggle-dot{width:10px;height:10px;border-radius:999px;background:var(--pw-accent);display:inline-block;}
+
 .pw-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;}
-.pw-card{background:var(--pw-surface);border:1px solid var(--pw-border);border-radius:var(--pw-radius);box-shadow:var(--pw-shadow);overflow:hidden;}
+.pw-card{min-width:0;background:var(--pw-surface);border:1px solid var(--pw-border);border-radius:var(--pw-radius);box-shadow:var(--pw-shadow);overflow:hidden;}
 .pw-hd{padding:12px 14px 9px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--pw-border);background:var(--pw-surface2);}
 .pw-k{font-weight:700;font-size:12px;letter-spacing:.2px;}
 .pw-t{font-family:var(--pw-mono);font-size:11px;color:var(--pw-muted);}
@@ -188,40 +186,32 @@ WRAPPER 'master_templates/master.tmpl'
 .pw-subgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:9px;}
 .pw-kv{padding:9px;border:1px solid var(--pw-border);border-radius:12px;background:var(--pw-surface2);display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--pw-muted);}
 .pw-kv b{color:var(--pw-text);font-weight:700;font-family:var(--pw-mono);}
+
+.pw-span-3{grid-column:span 3;}
 .pw-span-6{grid-column:span 6;}
 .pw-span-12{grid-column:span 12;}
-@media (max-width:980px){.pw-span-6{grid-column:span 12}.pw-top{flex-direction:column;align-items:flex-start}.pw-meta{justify-content:flex-start}}
-table.pw-table{width:100%;border-collapse:collapse;font-size:12px;color:var(--pw-text);border-radius:12px;overflow:hidden;}
+
+@media (max-width:980px){
+  .pw-span-3{grid-column:span 12;}
+  .pw-span-6{grid-column:span 12;}
+  .pw-top{flex-direction:column;align-items:flex-start}
+  .pw-meta{justify-content:flex-start}
+}
+
+table.pw-table{width:100%;font-size:12px;color:var(--pw-text);border-radius:12px;overflow:hidden;}
 .pw-table th,.pw-table td{text-align:left;padding:9px;border-bottom:1px solid var(--pw-border);white-space:nowrap;vertical-align:middle;}
 .pw-table th{color:var(--pw-muted);font-weight:700;font-size:11px;letter-spacing:.2px;text-transform:uppercase;background:var(--pw-surface2);}
 .pw-table tbody tr:hover{background:var(--pw-surface2);}
 .pw-num{font-family:var(--pw-mono);text-align:right;}
 .pw-pad-top{padding-top:9px;}
+
 .pw-footer{margin-top:12px;color:var(--pw-muted);font-size:12px;line-height:1.45;}
+.pw-link{color:var(--pw-muted);text-decoration:underline;}
+.pw-link:hover{color:var(--pw-text);}
 </style>
 
 <script>
 (function(){
-  const root = document.getElementById("procwatch");
-  const toggle = document.getElementById("themeToggle");
-  const themeText = document.getElementById("themeText");
-
-  function applyTheme(mode){
-    const dark = mode === "dark";
-    root.classList.toggle("pw-dark", dark);
-    themeText.textContent = dark ? "Light" : "Dark";
-    try { localStorage.setItem("procwatch_theme", dark ? "dark" : "light"); } catch(e) {}
-  }
-
-  let saved = "light";
-  try { saved = localStorage.getItem("procwatch_theme") || "light"; } catch(e) {}
-  applyTheme(saved);
-
-  toggle.addEventListener("click", function(){
-    const isDark = root.classList.contains("pw-dark");
-    applyTheme(isDark ? "light" : "dark");
-  });
-
   const fmtGB=(kb)=> (kb/1024/1024).toFixed(2)+" GB";
   const fmtMB=(kb)=>{const mb=kb/1024; if(mb>=1024) return (mb/1024).toFixed(2)+" GB"; return mb.toFixed(0)+" MB";};
   const pct=(permille)=> (permille/10).toFixed(1);
