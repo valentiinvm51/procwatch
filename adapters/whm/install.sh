@@ -52,6 +52,7 @@ main() {
   mkdir -p "${CGI_DST_DIR}"
   install -m 0755 "${CGI_SRC_DIR}/index.cgi" "${CGI_DST_DIR}/index.cgi"
   install -m 0755 "${CGI_SRC_DIR}/metrics.cgi" "${CGI_DST_DIR}/metrics.cgi"
+  install -m 0644 "${CGI_SRC_DIR}/VERSION" "${CGI_DST_DIR}/VERSION"
 
   echo "[4/6] Installing Template Toolkit interface"
   mkdir -p "/usr/local/cpanel/whostmgr/docroot/templates/procwatch"
