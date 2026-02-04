@@ -229,7 +229,7 @@ table.pw-table{width:100%;border-collapse:collapse;font-size:12px;color:var(--pw
   const loadHint=(l1)=>{ if(l1<0.8) return "OK"; if(l1<2.0) return "Busy"; return "High"; };
 
   async function fetchMetrics(){
-    const res = await fetch("metrics.cgi", { cache: "no-store" });
+    const res = await fetch("index.cgi?action=metrics", { cache: "no-store" });
     return await res.json();
   }
 
