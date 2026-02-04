@@ -1,11 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_CONF_SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/appconfig/procwatch.conf"
-CGI_SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/cgi/procwatch"
+# ProcWatch WHM installer
+#
+# - Registers a WHM AppConfig entry (adds a left-menu item)
+# - Installs the CGI script (UI + JSON endpoint)
+# - Installs an icon (48x48 PNG) under addon_plugins
+# - Creates a small cache directory
+#
+# Docs:
+# - https://api.docs.cpanel.net/guides/quickstart-development-guide/tutorial-create-a-whm-plugin/
+# - https://api.docs.cpanel.net/guides/quickstart-development-guide/tutorial-register-a-whm-plugin-with-appconfig/
 
-APP_CONF_DST="/var/cpanel/apps/procwatch.conf"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+APP_CONF_SRC="${SCRIPT_DIR}/appconfig/procwatch.conf"
+CGI_SRC_DIR="${SCRIPT_DIR}/cgi/procwatch"
+ICON_SRC="${SCRIPT_DIR}/icon/procwatch.png"
+
 CGI_DST_DIR="/usr/local/cpanel/whostmgr/docroot/cgi/procwatch"
+ICON_DST_DIR="/usr/local/cpanel/whostmgr/docroot/addon_plugins"
 CACHE_DIR="/var/cache/procwatch"
 
 require_root() {
@@ -15,25 +29,36 @@ require_root() {
   fi
 }
 
+require_cpanel() {
+  if [[ ! -x "/usr/local/cpanel/bin/register_appconfig" ]]; then
+    echo "ERROR: cPanel/WHM not detected. Missing /usr/local/cpanel/bin/register_appconfig" >&2
+    exit 1
+  fi
+}
+
 main() {
   require_root
+  require_cpanel
 
-  echo "[1/4] Creating cache dir: ${CACHE_DIR}"
+  echo "[1/5] Creating cache dir: ${CACHE_DIR}"
   mkdir -p "${CACHE_DIR}"
   chmod 0755 "${CACHE_DIR}"
 
-  echo "[2/4] Installing WHM AppConfig: ${APP_CONF_DST}"
-  install -m 0644 "${APP_CONF_SRC}" "${APP_CONF_DST}"
+  echo "[2/5] Installing icon to: ${ICON_DST_DIR}"
+  mkdir -p "${ICON_DST_DIR}"
+  install -m 0644 "${ICON_SRC}" "${ICON_DST_DIR}/procwatch.png"
 
-  echo "[3/4] Installing CGI script: ${CGI_DST_DIR}"
+  echo "[3/5] Installing CGI script to: ${CGI_DST_DIR}"
   mkdir -p "${CGI_DST_DIR}"
   install -m 0755 "${CGI_SRC_DIR}/index.cgi" "${CGI_DST_DIR}/index.cgi"
 
-  echo "[4/4] Registering AppConfig (WHM menu refresh)"
-  /usr/local/cpanel/bin/register_appconfig "${APP_CONF_DST}" >/dev/null
+  echo "[4/5] Registering AppConfig (adds WHM menu item)"
+  /usr/local/cpanel/bin/register_appconfig "${APP_CONF_SRC}" >/dev/null
 
+  echo "[5/5] Done"
   echo
-  echo "Installed successfully. Open WHM -> ProcWatch."
+  echo "Installed successfully."
+  echo "- Log into WHM and open: ProcWatch"
 }
 
 main "$@"

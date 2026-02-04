@@ -1,9 +1,69 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
+set -o pipefail
 
 CACHE_DIR="/var/cache/procwatch"
 CACHE_FILE="${CACHE_DIR}/metrics.json"
 CACHE_TTL_SECONDS=5
+
+# --- safety guards ----------------------------------------------------------
+# We intentionally avoid infinite loops and long-running collection.
+# Collection is guarded by:
+# - cache TTL (5s)
+# - command timeouts (when available)
+# - low priority execution (nice/ionice)
+# - process list hard cap
+
+CMD_TIMEOUT_SECONDS=2
+PS_LIMIT_ROWS=5000
+
+HAS_TIMEOUT=0
+command -v timeout >/dev/null 2>&1 && HAS_TIMEOUT=1
+
+HAS_IONICE=0
+command -v ionice >/dev/null 2>&1 && HAS_IONICE=1
+
+WARNINGS=()
+
+add_warning() {
+  local w="$1"
+  WARNINGS+=("$w")
+}
+
+run_guarded() {
+  # Usage: run_guarded "<label>" <command> [args...]
+  # Runs the command with best-effort guards. If it fails/times out, we record a warning.
+  local label="$1"
+  shift
+
+  local rc=0
+  local out=""
+
+  if [[ "${HAS_TIMEOUT}" -eq 1 ]]; then
+    if [[ "${HAS_IONICE}" -eq 1 ]]; then
+      out="$(ionice -c3 nice -n 15 timeout "${CMD_TIMEOUT_SECONDS}" "$@" 2>/dev/null)" || rc=$?
+    else
+      out="$(nice -n 15 timeout "${CMD_TIMEOUT_SECONDS}" "$@" 2>/dev/null)" || rc=$?
+    fi
+  else
+    if [[ "${HAS_IONICE}" -eq 1 ]]; then
+      out="$(ionice -c3 nice -n 15 "$@" 2>/dev/null)" || rc=$?
+    else
+      out="$(nice -n 15 "$@" 2>/dev/null)" || rc=$?
+    fi
+  fi
+
+  if [[ "${rc}" -ne 0 ]]; then
+    # 124 is the common exit code for GNU timeout
+    if [[ "${rc}" -eq 124 ]]; then
+      add_warning "timeout:${label}"
+    else
+      add_warning "error:${label}:${rc}"
+    fi
+  fi
+
+  printf "%s" "${out}"
+}
 
 http_header_json(){ printf "Content-Type: application/json\r\n\r\n"; }
 http_header_html(){ printf "Content-Type: text/html; charset=utf-8\r\n\r\n"; }
@@ -76,7 +136,7 @@ collect_mem() {
   ' /proc/meminfo
 }
 
-collect_disk(){ df -P / | awk 'NR==2{print $2,$3,$4,$5}'; }
+collect_disk(){ run_guarded \"df\" df -P / | awk 'NR==2{print $2,$3,$4,$5}'; }
 
 secs_to_hms(){
   local s="$1"
@@ -88,7 +148,7 @@ secs_to_hms(){
 
 collect_tables() {
   local psout
-  psout="$(ps -eo pid,user,pcpu,rss,etimes,args --no-headers 2>/dev/null || true)"
+  psout="$(run_guarded "ps" ps -eo pid,user,pcpu,rss,etimes,args --no-headers | head -n "${PS_LIMIT_ROWS}")"
 
   echo "===PROCS==="
   printf "%s\n" "$psout" \
@@ -219,6 +279,23 @@ build_metrics_json(){
     done <<<"$pools"
     printf "]"
 
+    # Warnings (if any)
+    printf ",\"warnings\":["
+    local firstw=1
+    for w in "${WARNINGS[@]}"; do
+      local jw
+      jw="$(json_escape "$w")"
+      if [[ $firstw -eq 0 ]]; then printf ","; fi
+      firstw=0
+      printf "\"%s\"" "$jw"
+    done
+    printf "]"
+    if [[ "${#WARNINGS[@]}" -gt 0 ]]; then
+      printf ",\"partial\":true"
+    else
+      printf ",\"partial\":false"
+    fi
+
     printf "}"
   } > "${CACHE_FILE}.tmp"
   mv -f "${CACHE_FILE}.tmp" "${CACHE_FILE}"
@@ -279,7 +356,8 @@ footer{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.45}
 </style></head>
 <body><div class="wrap">
 <header><div><h1>ProcWatch</h1><p class="subtitle">Fast, process-aware snapshots for WHM. Refreshes every 5 seconds. No history (MVP).</p></div>
-<div class="meta"><div class="pill">Host: <b id="host">-</b></div><div class="pill">Last update: <b id="ts">-</b></div><div class="pill">Cache TTL: <b>5s</b></div></div>
+<div class="meta"><div class="pill">Host: <b id="host">-</b></div><div class="pill">Last update: <b id="ts">-</b></div><div class="pill" id="warnPill" style="display:none;">⚠ <b id="warnText">partial data</b></div>
+      <div class="pill">Cache TTL: <b>5s</b></div></div>
 </header>
 
 <section class="grid">

@@ -45,11 +45,15 @@ It relies on standard Linux interfaces and tools:
 
 The installer copies files to:
 
-- WHM AppConfig:
-  - `/var/cpanel/apps/procwatch.conf`
+- WHM AppConfig (registered via `register_appconfig`):
+  - Source: `adapters/whm/appconfig/procwatch.conf`
+  - cPanel stores a copy under `/var/cpanel/apps/`
 
 - WHM CGI (plugin UI + JSON endpoint):
   - `/usr/local/cpanel/whostmgr/docroot/cgi/procwatch/index.cgi`
+
+- Icon:
+  - `/usr/local/cpanel/whostmgr/docroot/addon_plugins/procwatch.png`
 
 - Cache directory:
   - `/var/cache/procwatch/` (stores a short-lived JSON snapshot)
@@ -60,31 +64,53 @@ No services are started. No cron jobs are created.
 
 ## Install
 
-SSH as `root`, then:
+### Quick install (recommended)
 
 ```bash
-git clone https://github.com/<your-org-or-user>/procwatch.git
+git clone https://github.com/afbora/procwatch.git \
+  && cd procwatch \
+  && sudo bash adapters/whm/install.sh
+```
+
+### Manual install (step-by-step)
+
+```bash
+git clone https://github.com/afbora/procwatch.git
 cd procwatch
+
+# Review installer + what will be installed
+sed -n '1,200p' adapters/whm/install.sh
+sed -n '1,120p' adapters/whm/appconfig/procwatch.conf
+
+# Install
 sudo bash adapters/whm/install.sh
 ```
 
 After install:
 - Log into **WHM**
-- Look for **ProcWatch** in the left menu
+- Find **ProcWatch** in the left menu
 - Open it to see the dashboard.
-
----
 
 ## Uninstall
 
-SSH as `root`, then:
+### Quick uninstall
 
 ```bash
-cd procwatch
+cd /root/procwatch
 sudo bash adapters/whm/uninstall.sh
 ```
 
----
+### Manual uninstall (step-by-step)
+
+```bash
+cd /root/procwatch
+
+# Review uninstaller
+sed -n '1,200p' adapters/whm/uninstall.sh
+
+# Uninstall
+sudo bash adapters/whm/uninstall.sh
+```
 
 ## How it works
 
@@ -117,3 +143,46 @@ The dashboard shows:
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Safety & resource usage
+
+ProcWatch is designed to be safe to run on busy servers:
+
+- **No daemon / no cron** in MVP: the collector runs only when you open the WHM page.
+- **Short cache TTL** (default: 5s): prevents expensive collection on every refresh.
+- **Hard timeouts**: `ps` / `df` collection is guarded by `timeout` (when available).
+- **Low priority execution**: collection is run with `nice` (and `ionice` when available).
+- **Process list hard cap**: `ps` is capped to a fixed number of rows to avoid pathological cases.
+- **Fail-safe output**: on partial failures/timeouts, the dashboard still renders and shows a small warning indicator.
+
+> If `timeout` is not available on your system, ProcWatch falls back to best-effort execution (still cached + low priority).
+
+
+## Access control (ACL)
+
+By default, ProcWatch is **root-only** in WHM.
+
+This is enforced via the AppConfig setting:
+
+```ini
+acls=all
+```
+
+In WHM, `all` effectively means **root only**, because only the root user has *all* privileges.
+Resellers and delegated WHM users will **not** see the plugin.
+
+If you explicitly want resellers or delegated users to access ProcWatch, you may relax this setting:
+
+```ini
+acls=any
+```
+
+After changing the ACL, re-register the plugin:
+
+```bash
+/usr/local/cpanel/bin/register_appconfig adapters/whm/appconfig/procwatch.conf
+```
+
+> ⚠️ ProcWatch exposes server-wide process and resource information.  
+> Making it visible to non-root users is **not recommended**.
+
