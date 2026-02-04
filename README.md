@@ -12,7 +12,7 @@ It shows, in a single screen:
 - Top PHP-FPM pools (pool-level view)
 
 This repository is intentionally **simple**:
-- No historical charts (MVP)
+- No historical charts
 - No external databases
 - No heavy dependencies
 
