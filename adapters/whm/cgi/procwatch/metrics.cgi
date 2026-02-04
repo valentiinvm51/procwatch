@@ -65,8 +65,9 @@ run_guarded() {
   printf "%s" "${out}"
 }
 
-http_header_json(){ printf "Content-Type: application/json\r\n\r\n"; }
-http_header_html(){ printf "Content-Type: text/html; charset=utf-8\r\n\r\n"; }
+http_header_json(){ :; }
+
+http_header_html(){ :; }
 
 query_param() {
   local key="$1"
