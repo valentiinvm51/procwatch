@@ -43,11 +43,9 @@ sub run {
     Cpanel::Template::process_template(
         'whostmgr',
         {
-            template_file => 'procwatch/index.tmpl',
-            print         => 1,
-            template_args => {
-                procwatch_version => $version,
-            },
+            template_file       => 'procwatch/index.tmpl',
+            print               => 1,
+            procwatch_version   => $version
         }
     );
 }
