@@ -21,7 +21,7 @@ WRAPPER 'master_templates/master.tmpl'
   <div class="pw-top">
     <div class="pw-title">
       <div class="pw-h1">ProcWatch</div>
-      <div class="pw-sub">Fast, process-aware snapshots for WHM. Refreshes every 5 seconds. No history (MVP).</div>
+      <div class="pw-sub">Fast, process-aware snapshots for WHM. Refreshes every 5 seconds. No history.</div>
     </div>
 
     <div class="pw-meta">
@@ -126,10 +126,14 @@ WRAPPER 'master_templates/master.tmpl'
     </div>
   </div>
 
+  
   <div class="pw-footer">
-    ProcWatch <b>v1.0.0</b> •
-    <a class="pw-link" href="https://github.com/afbora/procwatch/releases/tag/1.0.0" target="_blank" rel="noreferrer">GitHub release</a>
+    ProcWatch <b>v[% procwatch_version %]</b> •
+    <a class="pw-link" href="https://github.com/afbora/procwatch/releases/tag/[% procwatch_version %]" target="_blank" rel="noreferrer">
+      GitHub release
+    </a>
   </div>
+
 </div>
 
 <style>
