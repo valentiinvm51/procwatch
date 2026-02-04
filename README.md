@@ -18,8 +18,9 @@ This repository is intentionally **simple**:
 
 > **Scope:** WHM (root / reseller). Not intended for end-user cPanel accounts.
 
-<img width="1440" height="1244" alt="preview" src="https://github.com/user-attachments/assets/9056b445-1a60-4e6f-befc-bcf336b0869e" />
+🚀 Live preview: [https://afbora.github.io/procwatch/preview.html](https://afbora.github.io/procwatch/preview.html)
 
+<img width="1440" height="1244" alt="preview" src="https://github.com/user-attachments/assets/9056b445-1a60-4e6f-befc-bcf336b0869e" />
 
 ---
 
@@ -192,9 +193,3 @@ After changing the ACL, re-register the plugin:
 
 > ⚠️ ProcWatch exposes server-wide process and resource information.  
 > Making it visible to non-root users is **not recommended**.
-
-
-
-## Theme
-
-ProcWatch defaults to a **light** theme to match WHM. Use the **Dark** toggle in the top-right to switch themes. Your choice is stored in `localStorage` for your browser.
